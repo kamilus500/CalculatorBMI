@@ -1,0 +1,89 @@
+﻿@page "/"
+@inject NavigationManager NavManager
+@inject IJSRuntime JSRuntime
+@inject IResultService resultService;
+@using System.ComponentModel.DataAnnotations;
+@using CalculatorBMI.UI.Services;
+
+<h2>Calculator BMI</h2>
+
+  <div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <EditForm Model="@formData" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-group mb-3">
+                    <label for="weight">Weight:</label>
+                    <InputNumber id="weight" class="form-control" @bind-Value="formData.Weight" />
+                    <ValidationMessage For="@(() => formData.Weight)" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="Height">Height:</label>
+                    <InputNumber id="height" class="form-control" @bind-Value="formData.Height" />
+                    <ValidationMessage For="@(() => formData.Height)" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="country">Sex:</label>
+                    <InputSelect id="sex" class="form-control" @bind-Value="formData.Sex">
+                        <option value="0">Female</option>
+                        <option value="1">Male</option>
+                    </InputSelect>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="Age">Age:</label>
+                    <InputNumber id="age" class="form-control" @bind-Value="formData.Age" />
+                    <ValidationMessage For="@(() => formData.Age)" />
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Calculate</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+  </div>
+
+@code {
+    private FormData formData = new FormData();
+
+    protected override void OnInitialized()
+    {
+        resultService.ClearResult();
+    }
+
+    private async Task HandleSubmit()
+    {
+        var apiUrl = "";
+
+        var httpClient = new HttpClient();
+
+        var response = await httpClient.PostAsJsonAsync(apiUrl, formData);
+
+        var result = await response.Content.ReadFromJsonAsync<Domain.Models.Result>();
+
+        if (result is not null)
+        {
+            resultService.SetResult(result);
+            NavManager.NavigateTo("/result");
+        }
+    }
+
+    private class FormData
+    {
+        [Required(ErrorMessage = "Field 'Weight' is required.")]
+        public double Weight { get; set; }
+
+        [Required(ErrorMessage = "Field 'Height' is required.")]
+        public double Height { get; set; }
+
+        [Required(ErrorMessage = "Field 'Sex' is required.")]
+        public int Sex { get; set; }
+
+        [Required(ErrorMessage = "Field 'Age' is required.")]
+        public int Age { get; set; }
+    }
+}

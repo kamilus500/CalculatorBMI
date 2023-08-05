@@ -1,0 +1,23 @@
+﻿@page "/result"
+@using CalculatorBMI.UI.Services;
+@inject IResultService resultService;
+@inject NavigationManager NavManager
+
+<div class="card">
+    <img src="img/bmi-otylosc.jpg" alt="Mass Visualization">
+    <h2>You are @result.MassIndex</h2>
+    <p>@result.BMI</p>
+</div>
+
+<div class="text-center mt-2">
+    <NavLink class="btn btn-primary" href="/">Back</NavLink>
+</div>
+
+@code {
+    private Domain.Models.Result result;
+
+    protected override void OnInitialized()
+    {
+        result = resultService.GetResult();
+    }
+}
